@@ -1,0 +1,70 @@
+# vim:filetype=sh
+
+connect() {
+    if [ $# -eq 2 ]; then
+        : "${JCON_CONN_COUNT:=0}"
+
+        eval 'export JCON_CONN_'"$JCON_CONN_COUNT"'_A="$1"'
+        eval 'export JCON_CONN_'"$JCON_CONN_COUNT"'_B="$2"'
+
+        export JCON_CONN_COUNT="$((JCON_CONN_COUNT + 1))"
+    else
+        to=
+        a_arg=
+        b_arg=
+        for arg in "$@"; do
+            if [ "$arg" = to ]; then
+                to=1
+            elif [ -z "$to" ]; then
+                if [ -z "$a_arg" ]
+                then a_arg="${arg}"
+                else a_arg="${a_arg}|${arg}"
+                fi
+            else
+                if [ -z "$b_arg" ]
+                then b_arg="${arg}"
+                else b_arg="${b_arg}|${arg}"
+                fi
+            fi
+        done
+        a_arg="(${a_arg})"
+        b_arg="(${b_arg})"
+
+        connect "$a_arg" "$b_arg"
+    fi
+}
+
+
+# Pulseaudio
+connect 'PulseAudio JACK Sink:front-left'     \
+        'alsoft:channel_1'                    \
+        'alsa-jack\.jackP\.[0-9]+\.1:out_000' \
+     to 'Jacon:PulseSink L'
+
+connect 'PulseAudio JACK Sink:front-right'    \
+        'alsoft:channel_2'                    \
+        'alsa-jack\.jackP\.[0-9]+\.1:out_001' \
+     to 'Jacon:PulseSink R'
+
+connect 'Jacon:PUBLIC L' to 'PulseAudio JACK Source:front-left'
+connect 'Jacon:PUBLIC R' to 'PulseAudio JACK Source:front-right'
+
+# MPD
+connect '(python2|Mopidy):out_jackaudiosink0_1' to 'Jacon:MPD L'
+connect '(python2|Mopidy):out_jackaudiosink0_2' to 'Jacon:MPD R'
+
+connect 'Jacon:MPD Out L' \
+     to 'Jacon:PrivMPD L' \
+        'Jacon:PubMPD L'
+
+connect 'Jacon:MPD Out R' \
+     to 'Jacon:PrivMPD R' \
+        'Jacon:PubMPD R'
+
+# System
+connect 'system:capture_(1|2)' to 'Jacon:Mic M'
+
+connect 'Jacon:MONITOR L' to 'system:playback_1'
+connect 'Jacon:MONITOR R' to 'system:playback_2'
+
+# env | grep JCON
