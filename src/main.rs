@@ -1,11 +1,7 @@
 extern crate jack;
 extern crate regex;
-extern crate serde;
-extern crate serde_json;
-extern crate serde_regex;
 
 use regex::Regex;
-use serde::Deserialize;
 
 use std::result;
 use std::sync::mpsc::{
