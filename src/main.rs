@@ -215,23 +215,13 @@ impl ConnMap {
 
     // TODO: Dedup these two functions
     pub fn find_with_in(&self, n: &IName) -> Vec<ORegex> {
-        let mut r = vec![];
-        for (o, i) in self.map.iter() {
-            if i.matches(n) {
-                r.push(o.clone()); // TODO: not clone
-            }
-        }
-        r
+        self.map.iter()
+            .filter(|(_, i)|i.matches(n)).map(|(o, _)|o.clone()).collect()
     }
 
     pub fn find_with_out(&self, n: &OName) -> Vec<IRegex> {
-        let mut r = vec![];
-        for (o, i) in self.map.iter() {
-            if o.matches(n) {
-                r.push(i.clone()); // TODO: not clone
-            }
-        }
-        r
+        self.map.iter()
+            .filter(|(o, _)|o.matches(n)).map(|(_, i)|i.clone()).collect()
     }
 
     pub fn insert(&mut self, o: ORegex, i: IRegex) {
