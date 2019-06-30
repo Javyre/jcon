@@ -72,25 +72,17 @@ struct In<T>(T);
 #[derive(Debug, Clone)]
 struct Out<T>(T);
 
-type PFlags = jack::PortFlags;
-
-#[derive(Debug, Eq, PartialEq)]
-struct PortName(String);
-
 #[derive(Debug, Eq, PartialEq)]
 struct PName(String);
-
-type IName = In<PName>;
-type OName = Out<PName>;
-
-#[derive(Debug, Clone)]
-struct PortRegex(Regex);
-
 #[derive(Debug, Clone)]
 struct PRegex(Regex);
 
+type IName  = In<PName>;
+type OName  = Out<PName>;
 type IRegex = In<PRegex>;
 type ORegex = Out<PRegex>;
+
+type PFlags = jack::PortFlags;
 
 #[derive(Debug)]
 struct ConnMap {
@@ -110,12 +102,10 @@ enum UserCommand {
     Toggle(ORegex, IRegex),
 }
 
-type UserCommandResponse = Result<()>;
-
 #[derive(Debug)]
 enum Command {
-    EnsureConnected(PortRegex, PortRegex),
-    EnsureDisConnected(PortRegex, PortRegex),
+    EnsureConnected(PRegex, PRegex),
+    EnsureDisConnected(PRegex, PRegex),
 }
 
 #[derive(Debug)]
@@ -128,7 +118,7 @@ enum Notification {
 
 #[derive(Debug)]
 enum Signal {
-    UserCommand(UserCommand, Sender<UserCommandResponse>),
+    UserCommand(UserCommand, Sender<Result<()>>),
     Command(Command),
     Notification(Notification),
 }
@@ -148,7 +138,6 @@ struct RunningPatchbay {
 
 #[derive(Clone, Debug)]
 enum Error {
-    InvalidJson,
     ParseIntError(std::num::ParseIntError),
     InvalidEnv(env::VarError),
     InvalidRegex(regex::Error),
