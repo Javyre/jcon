@@ -9,10 +9,6 @@ use std::sync::mpsc::{
     Sender,
     Receiver,
 };
-use std::collections::{
-    HashMap,
-    HashSet,
-};
 
 use std::env;
 
@@ -376,8 +372,7 @@ impl RunningPatchbay {
     }
 
     fn init_corrections(&self) -> Result<()> {
-        self.all_out_ports()
-            .map(|an|{
+        self.all_out_ports().map(|an|{
                 self.all_in_ports().map(|bn|{
                     let are_connected  = self.are_connected(&an, &bn)?;
                     let should_connect = self.should_connect(&an, &bn);
